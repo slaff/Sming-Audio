@@ -16,21 +16,31 @@ COMPONENT_SRCFILES := \
 	src/AudioLogger.cpp \
 	src/AudioOutputBuffer.cpp \
 	src/AudioOutputFilterDecimate.cpp \
-	src/AudioOutputI2S.cpp \
-	src/AudioOutputI2SNoDAC.cpp \
 	src/AudioOutputMixer.cpp \
 	src/AudioOutputSerialWAV.cpp \
-	src/AudioOutputSTDIO.cpp \
+	src/AudioOutputWAV.cpp \
+	src/AudioOutputSPIFFSWAV.cpp \
 	src/AudioFileSourceBuffer.cpp \
 	src/AudioFileSourceID3.cpp \
 	src/AudioFileSourcePROGMEM.cpp \
 	src/AudioFileStream.cpp \
 	src/AudioFileSourceFS.cpp
+	
+ifeq ($(SMING_ARCH),Esp8266)
+
+COMPONENT_SRCFILES += \
+	src/AudioOutputI2S.cpp \
+	src/AudioOutputI2SNoDAC.cpp
+
+else ifeq ($(SMING_ARCH),Host)
+
+COMPONENT_SRCFILES += \
+	src/AudioOutputSTDIO.cpp \
+	src/AudioFileSourceSTDIO.cpp
+endif
 
 #	src/AudioFileSourceICYStream.cpp \
-#	src/AudioOutputSPIFFSWAV.cpp \
 #	src/AudioFileSourceHTTPStream.cpp \
 #	src/AudioFileSourceSD.cpp \
 #	src/AudioFileSourceSPIRAMBuffer.cpp \
-#	src/AudioFileSourceSTDIO.cpp \
-	
+#	

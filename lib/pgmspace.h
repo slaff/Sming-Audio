@@ -14,4 +14,8 @@
 		&__c[0];                                                                                                       \
 	}))
 
+#ifdef ICACHE_FLASH
 void *memcpy_P(void *dest, const void *src_P, size_t length);
+#else
+#define memcpy_P(dest, src, num) memcpy((dest), (src), (num))
+#endif
