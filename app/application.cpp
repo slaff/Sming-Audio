@@ -1,11 +1,10 @@
 #include <SmingCore.h>
+#include <Platform/Timers.h>
 
-#define DEMO_MIDI
-//#define DEMO_MP3
+//#define DEMO_MIDI
+#define DEMO_MP3
 
-
-template <typename File>
-bool openFile(File& f, const char* filename)
+template <typename File> bool openFile(File& f, const char* filename)
 {
 	if(f.open(filename)) {
 		debug_i("Opened '%s'", filename);
@@ -16,6 +15,12 @@ bool openFile(File& f, const char* filename)
 	}
 }
 
+// Called when there's a warning or error (like a buffer underflow or decode hiccup)
+void StatusCallback(void* cbData, int code, const char* string)
+{
+	const char* ptr = reinterpret_cast<const char*>(cbData);
+	debug_w("STATUS(%s) '%d' = '%s'\n", ptr, code, string);
+}
 
 #ifdef ARCH_HOST
 
@@ -46,7 +51,7 @@ static void setup()
 	Serial.println("Sample MIDI playback\n");
 
 	openFile(sf2File, "1mgm.sf2");
-	openFile(source, "furelise.mid"));
+	openFile(source, "furelise.mid");
 	generator.SetSoundfont(&sf2File);
 	generator.SetSampleRate(22050);
 }
@@ -56,8 +61,9 @@ static void setup()
 #include "AudioFileSourceID3.h"
 #include "AudioGeneratorMP3.h"
 
-AudioFileSourceFS mp3File;
-AudioFileSourceID3 source(&mp3File);
+AudioFileSourceFS source;
+//AudioFileSourceFS mp3File;
+//AudioFileSourceID3 source(&mp3File);
 AudioGeneratorMP3 generator;
 
 // Called when a metadata event occurs (i.e. an ID3 tag, an ICY block, etc.
@@ -84,8 +90,11 @@ static void setup()
 {
 	Serial.println("Sample MP3 playback");
 
-	openFile(mp3File, "pno-cs.mp3");
-	source.RegisterMetadataCB(MDCallback, (void*)"ID3TAG");
+	//	openFile(mp3File, "pno-cs.mp3");
+	//	mp3File.RegisterStatusCB(StatusCallback, (void*)"source");
+	//	source.RegisterMetadataCB(MDCallback, (void*)"ID3TAG");
+	openFile(source, "pno-cs.mp3");
+
 #ifdef ARCH_HOST
 	output.SetFilename("test-out.wav");
 #endif
@@ -93,15 +102,24 @@ static void setup()
 
 #endif
 
+static OneShotFastUs loopTimer;
+
 static void loop()
 {
+	loopTimer.start();
 	if(generator.isRunning()) {
 		if(!generator.loop()) {
-			generator.stop();
+			source.seek(0, SEEK_SET);
+			//			generator.stop();
 		}
 		System.queueCallback(TaskCallback(loop));
 	} else {
 		Serial.println("Playback complete.");
+	}
+	auto elapsed = loopTimer.elapsedTicks();
+	if(elapsed > loopTimer.checkTime<20000>()) {
+		Serial.print("loop time: ");
+		Serial.println(elapsed);
 	}
 }
 
@@ -113,18 +131,23 @@ static void onReady()
 
 	audioLogger = &Serial;
 
-    audioLogger->printf_P(PSTR("Logger check OK\n"));
+	audioLogger->print(_F("Logger check OK\n"));
 
-    setup();
+	setup();
+
+	source.RegisterStatusCB(StatusCallback, (void*)"source");
 
 #ifndef ARCH_HOST
 	i2s_set_pins(I2S_PIN_DATA_OUT, true);
 #endif
 
-	timer.initializeMs(1000, InterruptCallback([]() {
+	timer.initializeMs<1000>(InterruptCallback([]() {
 		Serial.print("free heap: ");
 		Serial.println(system_get_free_heap_size());
-	})).start();
+	}));
+	timer.start();
+
+	System.setCpuFrequency(eCF_160MHz);
 
 	Serial.println("BEGIN...");
 	generator.begin(&source, &output);
@@ -133,16 +156,18 @@ static void onReady()
 
 void init()
 {
-#ifdef ARCH_ESP8266
-	// I2S uses standard serial pins, so switch to UART1
-	Serial.setPort(1);
-#endif
 	Serial.setTxBufferSize(1024);
 	Serial.setTxWait(false);
 	Serial.begin(SERIAL_BAUD_RATE);
 	Serial.systemDebugOutput(true);
 
+	// I2S uses standard serial pins, so use alternate pins
+	Serial.swap();
+
 	Serial.println("Hello");
+
+	WifiStation.enable(false, false);
+	WifiAccessPoint.enable(false, false);
 
 	System.onReady(onReady);
 }

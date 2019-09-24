@@ -1,4 +1,5 @@
 COMPONENT_SRCDIRS := \
+	src/libhelix-mp3 \
 	src/libmad
 
 COMPONENT_INCDIRS := \
