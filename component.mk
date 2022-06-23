@@ -22,14 +22,14 @@ COMPONENT_SRCFILES := \
 	$(AUDIO_LIB_ROOT)/src/AudioOutputBuffer.cpp \
 	$(AUDIO_LIB_ROOT)/src/AudioOutputFilterDecimate.cpp \
 	$(AUDIO_LIB_ROOT)/src/AudioOutputMixer.cpp \
-	$(AUDIO_LIB_ROOT)/src/AudioOutputSerialWAV.cpp \
-	$(AUDIO_LIB_ROOT)/src/AudioOutputWAV.cpp \
-	$(AUDIO_LIB_ROOT)/src/AudioOutputSPIFFSWAV.cpp \
-	$(AUDIO_LIB_ROOT)/src/AudioFileSourceBuffer.cpp \
-	$(AUDIO_LIB_ROOT)/src/AudioFileSourceID3.cpp \
-	$(AUDIO_LIB_ROOT)/src/AudioFileSourcePROGMEM.cpp \
-	$(AUDIO_LIB_ROOT)/src/AudioFileStream.cpp \
 	$(AUDIO_LIB_ROOT)/src/AudioFileSourceFS.cpp
+#	$(AUDIO_LIB_ROOT)/src/AudioOutputSerialWAV.cpp \
+#	$(AUDIO_LIB_ROOT)/src/AudioOutputSPIFFSWAV.cpp \
+#	$(AUDIO_LIB_ROOT)/src/AudioFileSourceBuffer.cpp \
+#	$(AUDIO_LIB_ROOT)/src/AudioFileSourceID3.cpp \
+#	$(AUDIO_LIB_ROOT)/src/AudioFileSourcePROGMEM.cpp \
+#	$(AUDIO_LIB_ROOT)/src/AudioFileStream.cpp \
+	
 	
 ifeq ($(SMING_ARCH),Esp8266)
 

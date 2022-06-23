@@ -1,0 +1,12 @@
+{
+    "name": "Basic_Audio sample",
+    "base_config": "spiffs",
+    "options": [
+        "4m"
+    ],
+    "partitions": {
+        "spiffs0": {
+            "size": "1.5M"
+        }
+    }
+}

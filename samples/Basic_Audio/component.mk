@@ -1,1 +1,2 @@
 COMPONENT_DEPENDS := Audio
+HWCONFIG := audio
